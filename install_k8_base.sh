@@ -84,6 +84,7 @@ network:
                 macaddress: "$NODE_STATIC_IP_MAC"
             addresses: [$NODE_STATIC_IP/24]
 EOF
+sudo chmod 644 /etc/netplan/10-custom.yaml
 echo "Netplan configuration created successfully."
 sudo netplan apply
 
