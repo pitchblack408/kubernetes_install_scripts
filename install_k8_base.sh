@@ -2,6 +2,8 @@
 
 set -e
 
+# Redirect all script output to syslog
+exec 1> >(logger -s -t $(basename $0)) 2>&1
 
 validate_mac() {
     mac_address=$1
