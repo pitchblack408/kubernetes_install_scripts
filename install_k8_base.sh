@@ -5,6 +5,11 @@ set -e
 # Redirect all script output to syslog
 exec 1> >(logger -s -t $(basename $0)) 2>&1
 
+
+export CONTAINERD_VERSION="1.7.11"
+export RUNC_VERSION="1.1.10"
+export KUBERNETES_VERSION="1.30"
+
 validate_mac() {
     mac_address=$1
     # Regular expression to match a valid MAC address format
@@ -69,10 +74,6 @@ fi
 if ! command -v apt-get >/dev/null 2>&1; then
     echo "The command apt-get is not installed."
 fi
-
-CONTAINERD_VERSION="1.7.11"
-RUNC_VERSION="1.1.10"
-KUBERNETES_VERSION="1.30"
 
 
 echo "Creating netplan in /etc/netplan/10-custom.yaml"
