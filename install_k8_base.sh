@@ -86,58 +86,58 @@ network:
 EOF
 sudo chmod 644 /etc/netplan/10-custom.yaml
 echo "Netplan configuration created successfully."
-sudo netplan apply
-
-cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
-overlay
-br_netfilter
-EOF
-
-modprobe overlay
-modprobe br_netfilter
-echo "Installed overlay and br_netfilter kernel modules successfully."
-
-cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-iptables  = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-net.ipv4.ip_forward                 = 1
-EOF
-
-sudo sysctl --system
-echo "Applied the new network configuration successfully."
-
-sudo swapoff -a
-#Cron job to ensure swap is off after reboot
-(crontab -l 2>/dev/null; echo "@reboot /sbin/swapoff -a") | crontab - || true
-echo "Applied swapoff -a successfully."
-
-
-wget https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-amd64.tar.gz
-sudo tar Cxzvf /usr/local containerd-${CONTAINERD_VERSION}-linux-amd64.tar.gz
-sudo mkdir /etc/containerd
-containerd config default > config.toml
-sudo cp config.toml /etc/containerd
-wget https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
-sudo cp containerd.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now containerd
-echo "Installed containerd v$CONTAINERD_VERSION successfully"
-
-
-wget https://github.com/opencontainers/runc/releases/download/v${RUNC_VERSION}/runc.amd64
-sudo install -m 755 runc.amd64 /usr/local/sbin/runc
-echo "Installed runc v$RUNC_VERSION successfully"
-
-
-sudo apt-get update
-sudo apt-get install -y apt-transport-https ca-certificates curl gpg jq
-sudo mkdir -p -m 755 /etc/apt/keyrings
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v${KUBERNETES_VERSION}/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v${KUBERNETES_VERSION}/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-sudo apt-get update
-sudo apt-get install -y kubelet kubeadm kubectl
-sudo apt-mark hold kubelet kubeadm kubectl
-echo "Installed runc v$KUBERNETES_VERSION successfully."
-
-echo "KUBELET_EXTRA_ARGS=--node-ip=$NODE_STATIC_IP" | sudo tee /etc/default/kubelet > /dev/null
-echo "The static ip $ was set in the kublet args in the /etc/default/kubelet file."
+#sudo netplan apply
+#
+#cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+#overlay
+#br_netfilter
+#EOF
+#
+#modprobe overlay
+#modprobe br_netfilter
+#echo "Installed overlay and br_netfilter kernel modules successfully."
+#
+#cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+#net.bridge.bridge-nf-call-iptables  = 1
+#net.bridge.bridge-nf-call-ip6tables = 1
+#net.ipv4.ip_forward                 = 1
+#EOF
+#
+#sudo sysctl --system
+#echo "Applied the new network configuration successfully."
+#
+#sudo swapoff -a
+##Cron job to ensure swap is off after reboot
+#(crontab -l 2>/dev/null; echo "@reboot /sbin/swapoff -a") | crontab - || true
+#echo "Applied swapoff -a successfully."
+#
+#
+#wget https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-amd64.tar.gz
+#sudo tar Cxzvf /usr/local containerd-${CONTAINERD_VERSION}-linux-amd64.tar.gz
+#sudo mkdir /etc/containerd
+#containerd config default > config.toml
+#sudo cp config.toml /etc/containerd
+#wget https://raw.githubusercontent.com/containerd/containerd/main/containerd.service
+#sudo cp containerd.service /etc/systemd/system/
+#sudo systemctl daemon-reload
+#sudo systemctl enable --now containerd
+#echo "Installed containerd v$CONTAINERD_VERSION successfully"
+#
+#
+#wget https://github.com/opencontainers/runc/releases/download/v${RUNC_VERSION}/runc.amd64
+#sudo install -m 755 runc.amd64 /usr/local/sbin/runc
+#echo "Installed runc v$RUNC_VERSION successfully"
+#
+#
+#sudo apt-get update
+#sudo apt-get install -y apt-transport-https ca-certificates curl gpg jq
+#sudo mkdir -p -m 755 /etc/apt/keyrings
+#curl -fsSL https://pkgs.k8s.io/core:/stable:/v${KUBERNETES_VERSION}/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+#echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v${KUBERNETES_VERSION}/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+#sudo apt-get update
+#sudo apt-get install -y kubelet kubeadm kubectl
+#sudo apt-mark hold kubelet kubeadm kubectl
+#echo "Installed runc v$KUBERNETES_VERSION successfully."
+#
+#echo "KUBELET_EXTRA_ARGS=--node-ip=$NODE_STATIC_IP" | sudo tee /etc/default/kubelet > /dev/null
+#echo "The static ip $ was set in the kublet args in the /etc/default/kubelet file."
