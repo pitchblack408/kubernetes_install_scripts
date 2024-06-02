@@ -1,11 +1,45 @@
 #!/bin/bash
 
-set -ex
+set -e
 
-MAC_ADDRESS=$1
-if [[ ! -n $MAC_ADDRESS ]]; then
-  echo "The MAC_ADDRESS is a required parameter."
+
+validate_mac() {
+    mac_address=$1
+    # Regular expression to match a valid MAC address format
+    mac_regex="^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"
+
+    # Check if the provided MAC address matches the regex pattern
+    if [[ $mac_address =~ $mac_regex ]]; then
+        return 0 # True
+    else
+        return 1 # False
+    fi
+}
+
+
+
+NODE_STATIC_IP_MAC=$1
+if [[ ! -n $NODE_STATIC_IP_MAC ]]; then
+  echo "ERROR: Missing the parameter NODE_STATIC_IP_MAC, which is the node's static ip's MAC address is a required parameter."
+  exit 1
+else
+  if ! validate_mac "$NODE_STATIC_IP_MAC"; then
+      echo "MAC address '$NODE_STATIC_IP_MAC' is invalid."
+      exit 1
+  fi
+fi
+
+NODE_STATIC_IP=$2
+# Check if the IP address was retrieved successfully
+if [[ -z "$NODE_STATIC_IP" ]]; then
+    echo "ERROR: Missing the parameter NODE_STATIC_IP, which is the static ip address to be assigned to the MAC address $NODE_STATIC_IP_MAC."
     exit 1
+else
+    # Validate the IP address format
+    if ! [[ $NODE_STATIC_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo "Error: Invalid IP address format: $NODE_STATIC_IP"
+        exit 1
+    fi
 fi
 
 if [ "$EUID" -ne 0 ]; then
@@ -38,22 +72,8 @@ CONTAINERD_VERSION="1.7.11"
 RUNC_VERSION="1.1.10"
 KUBERNETES_VERSION="1.30"
 
-NODE_STATIC_IP=$(ip addr show eth1 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
-export NODE_STATIC_IP=$NODE_STATIC_IP
 
-# Check if the IP address was retrieved successfully
-if [[ -z "$NODE_STATIC_IP" ]]; then
-    echo "Error: Unable to retrieve IP address for eth1."
-    exit 1
-fi
-
-# Validate the IP address format
-if ! [[ $NODE_STATIC_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "Error: Invalid IP address format: $NODE_STATIC_IP"
-    exit 1
-fi
-
-echo "Creating netplan"
+echo "Creating netplan in /etc/netplan/10-custom.yaml"
 cat <<EOF | sudo tee /etc/netplan/10-custom.yaml
 network:
     version: 2
@@ -65,7 +85,7 @@ network:
             addresses: [$NODE_STATIC_IP/24]
 EOF
 echo "Netplan configuration created successfully."
-
+sudo netplan apply
 
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 overlay
