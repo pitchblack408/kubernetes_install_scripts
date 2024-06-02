@@ -136,11 +136,12 @@ sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg jq
 sudo mkdir -p -m 755 /etc/apt/keyrings
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v${KUBERNETES_VERSION}/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v${KUBERNETES_VERSION}/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo "Added kubernetes key to /etc/apt/keyrings/kubernetes-apt-keyring.gpg for $KUBERNETES_VERSION"
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v'${KUBERNETES_VERSION}'/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
-echo "Installed runc v$KUBERNETES_VERSION successfully."
+echo "Installed kubernetes v$KUBERNETES_VERSION successfully."
 
 echo "KUBELET_EXTRA_ARGS=--node-ip=$NODE_STATIC_IP" | sudo tee /etc/default/kubelet > /dev/null
 echo "The static ip $ was set in the kublet args in the /etc/default/kubelet file."
