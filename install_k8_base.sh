@@ -2,6 +2,12 @@
 
 set -ex
 
+MAC_ADDRESS=$1
+if [[ ! -n $MAC_ADDRESS ]]; then
+  echo "The MAC_ADDRESS is a required parameter."
+    exit 1
+fi
+
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root or with sudo."
   exit 1
@@ -55,7 +61,7 @@ network:
         extra0:
             dhcp4: no
             match:
-                macaddress: "52:54:00:00:97:13"
+                macaddress: "$NODE_STATIC_IP_MAC"
             addresses: [$NODE_STATIC_IP/24]
 EOF
 echo "Netplan configuration created successfully."
