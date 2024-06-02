@@ -9,4 +9,4 @@ set static_ip=192.168.20.16
 
 multipass launch --name %instance_name% -c %cpu_count% -m %memory_size% --network %network_params%
 multipass exec %instance_name% -- wget https://raw.githubusercontent.com/pitchblack408/kubernetes_install_scripts/main/install_k8_base.sh
-multipass exec %instance_name% -- sudo bash install_k8_base.sh %mac% %static_ip%
+multipass exec %instance_name% -- sudo bash install_k8_base.sh %mac% %static_ip% &
