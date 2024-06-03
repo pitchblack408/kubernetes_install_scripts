@@ -140,7 +140,7 @@ wget https://github.com/containernetworking/plugins/releases/download/v${CNI_PLU
 sudo mkdir -p /opt/cni/bin
 sudo tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v${CNI_PLUGINS_VERSION}.tgz
 sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
-sudo sed -i 's/sandbox_image \= "registry.k8s.io\/pause:'${K8_PAUSE_SANDBOX_IMG_VERSION_OLD}'/sandbox_image \= "registry.k8s.io\/pause:'${K8_PAUSE_SANDBOX_IMG_VERSION_REPLACEMENT}'"/g' /etc/containerd/config.toml
+sudo sed -i 's/sandbox_image \= "registry.k8s.io\/pause:'${K8_PAUSE_SANDBOX_IMG_VERSION_OLD}'"/sandbox_image \= "registry.k8s.io\/pause:'${K8_PAUSE_SANDBOX_IMG_VERSION_REPLACEMENT}'"/g' /etc/containerd/config.toml
 sudo systemctl restart containerd
 sudo systemctl status containerd
 echo "Installed CNI plugins successfully."
