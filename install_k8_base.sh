@@ -9,6 +9,9 @@ exec 1> >(logger -s -t $(basename $0)) 2>&1
 export CONTAINERD_VERSION="1.7.11"
 export RUNC_VERSION="1.1.10"
 export KUBERNETES_VERSION="1.30"
+export CNI_PLUGINS_VERSION="1.4.0"
+export K8_PAUSE_SANDBOX_IMG_VERSION_OLD="3.8"
+export K8_PAUSE_SANDBOX_IMG_VERSION_REPLACEMENT="3.9"
 
 validate_mac() {
     mac_address=$1
@@ -124,12 +127,23 @@ wget https://raw.githubusercontent.com/containerd/containerd/main/containerd.ser
 sudo cp containerd.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now containerd
-echo "Installed containerd v$CONTAINERD_VERSION successfully"
+echo "Installed containerd v$CONTAINERD_VERSION successfully."
 
 
 wget https://github.com/opencontainers/runc/releases/download/v${RUNC_VERSION}/runc.amd64
 sudo install -m 755 runc.amd64 /usr/local/sbin/runc
-echo "Installed runc v$RUNC_VERSION successfully"
+echo "Installed runc v$RUNC_VERSION successfully."
+
+
+
+wget https://github.com/containernetworking/plugins/releases/download/v${CNI_PLUGINS_VERSION}/cni-plugins-linux-amd64-v${CNI_PLUGINS_VERSION}.tgz
+sudo mkdir -p /opt/cni/bin
+sudo tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v${CNI_PLUGINS_VERSION}.tgz
+sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
+sudo sed -i 's/sandbox_image \= "registry.k8s.io\/pause:'${K8_PAUSE_SANDBOX_IMG_VERSION_OLD}'/sandbox_image \= "registry.k8s.io\/pause:'${K8_PAUSE_SANDBOX_IMG_VERSION_REPLACEMENT}'"/g' /etc/containerd/config.toml
+sudo systemctl restart containerd
+sudo systemctl status containerd
+echo "Installed CNI plugins successfully."
 
 
 sudo apt-get update
